@@ -1,0 +1,23 @@
+_BASE_: [
+  '../../runtime.yml',
+  '_base_/optimizer_3x.yml',
+  '_base_/ppyoloe_r_reader.yml',
+  '_base_/ppyoloe_r_crn.yml'
+]
+
+# Dataset configuration for inference only
+metric: RBOX
+num_classes: 15
+
+log_iter: 50
+snapshot_epoch: 1
+weights: output/ppyoloe_r_crn_s_3x_dota/model_final
+
+pretrain_weights: https://paddledet.bj.bcebos.com/models/pretrained/CSPResNetb_s_pretrained.pdparams
+depth_mult: 0.33
+width_mult: 0.50
+
+# Minimal dataset configuration for inference
+TestDataset:
+  !ImageFolder
+    anno_path: null 

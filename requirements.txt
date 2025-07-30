@@ -16,7 +16,7 @@ packaging
 # for MOT evaluation and inference
 lapx
 motmetrics
-sklearn==0.0
+scikit-learn
 
 # for vehicleplate in deploy/pipeline/ppvehicle
 pyclipper
