@@ -1,0 +1,67 @@
+Warning: Unable to use numba in PP-Tracking, please install numba, for example(python3.7): `pip install numba==0.56.4`
+Warning: Unable to use numba in PP-Tracking, please install numba, for example(python3.7): `pip install numba==0.56.4`
+[07/30 13:23:05] ppdet.utils.checkpoint INFO: Skipping import of the encryption module.
+======================= Modified FLAGS detected =======================
+FLAGS(name='FLAGS_enable_pir_in_executor', current_value=True, default_value=False)
+=======================================================================
+loading annotations into memory...
+Done (t=0.00s)
+creating index...
+index created!
+[07/30 13:23:05] ppdet.data.source.coco INFO: Load [100 samples valid, 0 samples invalid] in file ../src/train/dummy_dataset/annotations/instances_train.json.
+[07/30 13:23:05] reader WARNING: fail to map sample transform [RandomRRotate_f763b5] with error: 'gt_poly' and stack:
+Traceback (most recent call last):
+  File "/Users/klim/ppyoloer/PaddleDetection/ppdet/data/reader.py", line 80, in __call__
+    data = f(data)
+           ^^^^^^^
+  File "/Users/klim/ppyoloer/PaddleDetection/ppdet/data/transform/operators.py", line 108, in __call__
+    sample = self.apply(sample, context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/klim/ppyoloer/PaddleDetection/ppdet/data/transform/rotated_operators.py", line 181, in apply
+    return rotator(sample)
+           ^^^^^^^^^^^^^^^
+  File "/Users/klim/ppyoloer/PaddleDetection/ppdet/data/transform/operators.py", line 108, in __call__
+    sample = self.apply(sample, context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/klim/ppyoloer/PaddleDetection/ppdet/data/transform/rotated_operators.py", line 110, in apply
+    polys = sample['gt_poly']
+            ~~~~~~^^^^^^^^^^^
+KeyError: 'gt_poly'
+
+Exception in thread Thread-1 (_thread_loop):
+Traceback (most recent call last):
+  File "/Users/klim/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/threading.py", line 1075, in _bootstrap_inner
+    self.run()
+  File "/Users/klim/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/threading.py", line 1012, in run
+    self._target(*self._args, **self._kwargs)
+  File "/Users/klim/ppyoloer/.venv/lib/python3.12/site-packages/paddle/io/dataloader/dataloader_iter.py", line 245, in _thread_loop
+    batch = self._dataset_fetcher.fetch(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/klim/ppyoloer/.venv/lib/python3.12/site-packages/paddle/io/dataloader/fetcher.py", line 77, in fetch
+    data.append(self.dataset[idx])
+                ~~~~~~~~~~~~^^^^^
+  File "/Users/klim/ppyoloer/PaddleDetection/ppdet/data/source/dataset.py", line 113, in __getitem__
+    return self.transform(roidb)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/klim/ppyoloer/PaddleDetection/ppdet/data/reader.py", line 86, in __call__
+    raise e
+  File "/Users/klim/ppyoloer/PaddleDetection/ppdet/data/reader.py", line 80, in __call__
+    data = f(data)
+           ^^^^^^^
+  File "/Users/klim/ppyoloer/PaddleDetection/ppdet/data/transform/operators.py", line 108, in __call__
+    sample = self.apply(sample, context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/klim/ppyoloer/PaddleDetection/ppdet/data/transform/rotated_operators.py", line 181, in apply
+    return rotator(sample)
+           ^^^^^^^^^^^^^^^
+  File "/Users/klim/ppyoloer/PaddleDetection/ppdet/data/transform/operators.py", line 108, in __call__
+    sample = self.apply(sample, context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/klim/ppyoloer/PaddleDetection/ppdet/data/transform/rotated_operators.py", line 110, in apply
+    polys = sample['gt_poly']
+            ~~~~~~^^^^^^^^^^^
+KeyError: 'gt_poly'
+WARNING: Logging before InitGoogleLogging() is written to STDERR
+I0730 13:23:06.059442 1865792 data_type_transform.h:30] TransDataType src type:float32; dst type: float32
+I0730 13:23:06.059645 1865792 data_type_transform.h:30] TransDataType src type:float32; dst type: float32
+[07/30 13:23:06] ppdet.utils.checkpoint INFO: Finish loading model weights: /Users/klim/.cache/paddle/weights/CSPResNetb_s_pretrained.pdparams
