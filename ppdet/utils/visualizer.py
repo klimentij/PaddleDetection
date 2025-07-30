@@ -17,16 +17,13 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-import os
 import numpy as np
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw
 import cv2
 import math
 
 from .colormap import colormap
 from ppdet.utils.logger import setup_logger
-from ppdet.utils.compact import imagedraw_textsize_c
-from ppdet.utils.download import get_path
 logger = setup_logger(__name__)
 
 __all__ = ['visualize_results']
@@ -53,8 +50,7 @@ def visualize_results(image,
     if keypoint_res is not None:
         image = draw_pose(image, keypoint_res, threshold)
     if pose3d_res is not None:
-        pose3d = np.array(pose3d_res[0]['pose3d']) * 1000
-        image = draw_pose3d(image, pose3d, visual_thread=threshold)
+        image = draw_pose3d(image, pose3d_res, threshold)
     return image
 
 
@@ -88,11 +84,6 @@ def draw_bbox(image, im_id, catid2name, bboxes, threshold):
     """
     Draw bbox on image
     """
-    font_url = "https://paddledet.bj.bcebos.com/simfang.ttf"
-    font_path, _ = get_path(font_url, "~/.cache/paddle/")
-    font_size = 18
-    font = ImageFont.truetype(font_path, font_size, encoding="utf-8")
-
     draw = ImageDraw.Draw(image)
 
     catid2color = {}
@@ -107,7 +98,7 @@ def draw_bbox(image, im_id, catid2name, bboxes, threshold):
         if catid not in catid2color:
             idx = np.random.randint(len(color_list))
             catid2color[catid] = color_list[idx]
-        color = tuple(catid2color[catid])
+        color = tuple(int(c) for c in catid2color[catid])
 
         # draw bbox
         if len(bbox) == 4:
@@ -122,21 +113,24 @@ def draw_bbox(image, im_id, catid2name, bboxes, threshold):
                 fill=color)
         elif len(bbox) == 8:
             x1, y1, x2, y2, x3, y3, x4, y4 = bbox
+            # Convert numpy.float32 to int for PIL compatibility
             draw.line(
-                [(x1, y1), (x2, y2), (x3, y3), (x4, y4), (x1, y1)],
+                [(int(x1), int(y1)), (int(x2), int(y2)), (int(x3), int(y3)), (int(x4), int(y4)), (int(x1), int(y1))],
                 width=2,
                 fill=color)
-            xmin = min(x1, x2, x3, x4)
-            ymin = min(y1, y2, y3, y4)
+            xmin = int(min(x1, x2, x3, x4))
+            ymin = int(min(y1, y2, y3, y4))
         else:
             logger.error('the shape of bbox must be [M, 4] or [M, 8]!')
 
         # draw label
         text = "{} {:.2f}".format(catid2name[catid], score)
-        tw, th = imagedraw_textsize_c(draw, text, font=font)
+        # Use textbbox instead of deprecated textsize
+        bbox = draw.textbbox((0, 0), text)
+        tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
         draw.rectangle(
             [(xmin + 1, ymin - th), (xmin + tw + 1, ymin)], fill=color)
-        draw.text((xmin + 1, ymin - th), text, fill=(255, 255, 255), font=font)
+        draw.text((xmin + 1, ymin - th), text, fill=(255, 255, 255))
 
     return image
 
@@ -334,11 +328,12 @@ def draw_pose(image,
 
 
 def draw_pose3d(image,
-                pose3d,
-                pose2d=None,
+                results,
                 visual_thread=0.6,
                 save_name='pose3d.jpg',
-                returnimg=True):
+                save_dir='output',
+                returnimg=False,
+                ids=None):
     try:
         import matplotlib.pyplot as plt
         import matplotlib
@@ -347,11 +342,12 @@ def draw_pose3d(image,
         logger.error('Matplotlib not found, please install matplotlib.'
                      'for example: `pip install matplotlib`.')
         raise e
+    pose3d = np.array(results[0]['pose3d']) * 1000
 
     if pose3d.shape[0] == 24:
         joints_connectivity_dict = [
             [0, 1, 0], [1, 2, 0], [5, 4, 1], [4, 3, 1], [2, 3, 0], [2, 14, 1],
-            [3, 14, 1], [14, 16, 1], [15, 16, 1], [15, 12, 1], [6, 7, 0],
+            [3, 14, 1], [14, 15, 1], [15, 16, 1], [16, 12, 1], [6, 7, 0],
             [7, 8, 0], [11, 10, 1], [10, 9, 1], [8, 12, 0], [9, 12, 1],
             [12, 19, 1], [19, 18, 1], [19, 20, 0], [19, 21, 1], [22, 20, 0],
             [23, 21, 1]
@@ -457,9 +453,6 @@ def draw_pose3d(image,
         image = Image.frombytes("RGBA", (w, h), buf.tostring())
         return image.convert("RGB")
 
-    fig = draw_img_pose(pose3d, pose2d, frame=image)
+    fig = draw_img_pose(pose3d, frame=image)
     data = fig2data(fig)
-    if returnimg is False:
-        data.save(save_name)
-    else:
-        return data
+    return data
